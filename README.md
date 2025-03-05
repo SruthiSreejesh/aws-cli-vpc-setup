@@ -104,18 +104,19 @@ aws ec2 create-subnet --vpc-id vpc-0d7643c00170ac78a --availability-zone ap-sout
 
 #### ✅ Public Subnet 2  
 ```sh
-aws ec2 create-subnet --vpc-id <your-vpc-id> --availability-zone ap-south-1a --cidr-block 172.16.64.0/18 --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=your_publicSubnet2_name}]'
+aws ec2 create-subnet --vpc-id <your-vpc-id> --availability-zone ap-south-1b --cidr-block 172.16.64.0/18 --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=your_publicSubnet2_name}]'
 ```
 * Example:
 aws ec2 create-subnet --vpc-id vpc-0d7643c00170ac78a --availability-zone ap-south-1b --cidr-block 172.16.64.0/18 --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=Subnet-Public-1B}]'
 
 #### ✅ Private Subnet  
 ```sh
-aws ec2 create-subnet --vpc-id <add-your-vpc-id> --availability-zone ap-south-1c --cidr-block 172.16.128.0/18 --availability-zone us-east-1b --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=your_privateSubnet_name}]'
+aws ec2 create-subnet --vpc-id <add-your-vpc-id> --availability-zone ap-south-1c --cidr-block 172.16.128.0/18 --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=your_privateSubnet_name}]'
 ```
 * Example:
 aws ec2 create-subnet --vpc-id vpc-0d7643c00170ac78a --availability-zone ap-south-1c --cidr-block 172.16.128.0/18 --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value= Subnet-Private-1C }]'
 
+**Note** the `SubnetIds` from the response.
 ---
 
 ### 6️⃣ ASSIGN PUBLIC IPV4 
@@ -140,6 +141,8 @@ aws ec2 create-internet-gateway --tag-specifications 'ResourceType=internet-gate
 * Example:
 aws ec2 create-internet-gateway --tag-specifications 'ResourceType=internet-gateway,Tags=[{Key=Name,Value=IGW-for-CLI-VPC }]'
 
+**Note** the `IGW Id` from the response.
+
 ### 8️⃣ ATTACH THE INTERNET GATEWAY
 ```sh
 aws ec2 attach-internet-gateway --vpc-id <your-vpc-id> --internet-gateway-id <your-igw-id>
@@ -156,14 +159,14 @@ aws ec2 describe-route-tables --filter "Name= vpc-id, Values= vpc-0d7643c00170ac
 
 ### 🔟 ADD A NAME TAG TO THE PRIVATE ROUTE TABLE
 ```sh
-aws ec2 create-tags --resources <your-rt-id> --tags Key=Name,Value=your-private-route-name
+aws ec2 create-tags --resources <your-privateroutetable-id> --tags Key=Name,Value=your-private-routetable-name
 ```
 * Example:
 aws ec2 create-tags --resources rtb-0db467fdca4d36e85 --tags Key=Name,Value=Private-Route-CLIVPC
 
 ### 1️⃣1️⃣ CREATE PUBLIC ROUTE TABLE 
 ```sh
-aws ec2 create-route-table --vpc-id <your-vpc-id> --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=your-public-route-name}]'
+aws ec2 create-route-table --vpc-id <your-vpc-id> --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=your-public-routetable-name}]'
 ```
 * Example:
 aws ec2 create-route-table --vpc-id vpc-0d7643c00170ac78a--tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=Public-Route-CLIVPC }]'
@@ -172,7 +175,7 @@ aws ec2 create-route-table --vpc-id vpc-0d7643c00170ac78a--tag-specifications 'R
 
 ### 1️⃣2️⃣  ASSOCIATE THE INTERNET GATEWAY WITH THE PUBLIC ROUTE TABLE
 ```sh
-aws ec2 create-route --route-table-id <your-public-route-id> --destination-cidr-block 0.0.0.0/0 --gateway-id <your-igw-id>
+aws ec2 create-route --route-table-id <your-public-routetable-id> --destination-cidr-block 0.0.0.0/0 --gateway-id <your-igw-id>
 ```
 * Example:
 aws ec2 create-route --route-table-id rtb-005755730bba9f85b --destination-cidr-block 0.0.0.0/0 --gateway-id igw-07387ae5732acba92
@@ -180,7 +183,7 @@ aws ec2 create-route --route-table-id rtb-005755730bba9f85b --destination-cidr-b
 ---
 ### 1️⃣3️⃣ ASSOCIATE THE PUBLIC SUBNET 1 WITH PUBLIC ROUTE TABLE
 ```sh
-aws ec2 associate-route-table  --subnet-id <your-public1-subnet-id> --route-table-id <your-public-routetable-id>
+aws ec2 associate-route-table  --subnet-id <your-public-subnet1-id> --route-table-id <your-public-routetable-id>
 ```
 * Example:
 aws ec2 associate-route-table  --subnet-id subnet-056347fba473db6dd --route-table-id rtb-005755730bba9f85b
@@ -235,7 +238,7 @@ aws ec2 run-instances --image-id <your-ami-id> --count 1 --security-group-ids <y
 * Example:
 aws ec2 run-instances --image-id ami-0d682f26195e9ec0f  --count 1 --security-group-ids sg-084805f43ab469ff0  --instance-type t2.micro --subnet-id subnet-056347fba473db6dd  --key-name CLI-KEYPAIR --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=instance-Public-1A}]'
 
-### 2️⃣0️⃣ LAUNCH EC2 WITHOUT THE USE OF USER-DATA IN PUBLIC SUBNET 2
+### 2️⃣0️⃣ LAUNCH EC2 WITH THE USE OF USER-DATA IN PUBLIC SUBNET 2
 ```sh
 aws ec2 run-instances --image-id <your-ami-id> --count 1 --security-group-ids <your-security-group-id> --instance-type t2.micro --subnet-id <your-public-subnet2-id> --key-name <your-keypair-name> --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=<your-name-tag>}]' --user-data <your-user-data>
 ```
@@ -254,7 +257,7 @@ aws ec2 run-instances --image-id ami-0d682f26195e9ec0f   --count 1   --security-
 ### 2️⃣1️⃣ LAUNCH EC2 WITHOUT THE USE OF USER-DATA IN PRIVATE SUBNET 1
 
 ```sh
-aws ec2 run-instances --image-id <your-ami-id> --count 1 --security-group-ids <your-security-group-id> --instance-type t2.micro --subnet-id <your-private-subnet-id> --key-name <your-keypair-name> --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=<your-name-tag>}]'
+aws ec2 run-instances --image-id <your-ami-id> --count 1 --security-group-ids <your-security-group-id> --instance-type t3.micro --subnet-id <your-private-subnet-id> --key-name <your-keypair-name> --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=<your-name-tag>}]'
 ```
 * Example:
 aws ec2 run-instances --image-id ami-0d682f26195e9ec0f  --count 1 --security-group-ids sg-084805f43ab469ff0  --instance-type t3.micro --subnet-id subnet-0400769defe0dd20b --key-name CLI-KEYPAIR --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=instance-Private-1C}]'
@@ -273,12 +276,14 @@ aws ec2 describe-instances --filters Name=instance-id,Values=<your-publicsubnet-
 * Example:
 aws ec2 describe-instances --filters "Name=instance-id,Values=i-0f628c52ceabe0b83" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output table
 
-### 2️⃣4️⃣ GET PUBLIC IP ADDRESS OF EC2 INSTANCE IN PRIVATE SUBNET1 (NONE WILL BE DISPLAYED AS RESPONSE SINCE IT IS A PRIVATE SUBNET )
+### 2️⃣4️⃣ GET PUBLIC IP ADDRESS OF EC2 INSTANCE IN PRIVATE SUBNET 
 ```sh
 aws ec2 describe-instances --filters Name=instance-id,Values=<your-private-instance-id> --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output table
 ```
 * Example:
 aws ec2 describe-instances --filters "Name=instance-id,Values=i-0640ada575e77ea5c" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output table
+
+**NOTE** (NONE WILL BE DISPLAYED AS RESPONSE SINCE IT IS A PRIVATE SUBNET )
 
 ### 2️⃣5️⃣ VIEWING THE INSTANCE IN PUBLIC SUBNET1
 ```sh
